@@ -1,8 +1,16 @@
-from typing import Optional
+from typing import Any, Dict, Optional
+
+from flask_appbuilder.fieldwidgets import (
+    BS3PasswordFieldWidget,
+    BS3TextFieldWidget,
+    Select2Widget,
+)
+from flask_babel import lazy_gettext
+from TM1py.Services import TM1Service
+from wtforms import PasswordField, SelectField, StringField
 
 from airflow.exceptions import AirflowException
 from airflow.hooks.base import BaseHook
-from TM1py.Services import TM1Service
 
 
 class TM1Hook(BaseHook):
@@ -77,20 +85,64 @@ class TM1Hook(BaseHook):
                 raise AirflowException(f"Failed to create tm1 client, error: {str(e)}")
 
         return self.client
-    
+
     def test_connection(self):
-        status, message = False, ''
+        status, message = False, ""
         try:
             tm1 = self.get_conn()
             status = tm1.connection.is_connected()
-            message = 'Connection successfully tested'
+            message = "Connection successfully tested"
         except Exception as e:
             status = False
             message = str(e)
 
         return status, message
 
- 
+    @staticmethod
+    def get_connection_form_widgets() -> Dict[str, Any]:
+        return {
+            "base_url": StringField(
+                lazy_gettext("Base URL"),
+                widget=BS3TextFieldWidget(),
+                description=lazy_gettext("The base url for TM1 server"),
+            ),
+            "address": StringField(
+                lazy_gettext("Address"),
+                widget=BS3TextFieldWidget(),
+                description=lazy_gettext("Address of the TM1 server"),
+            ),
+            "port": StringField(
+                lazy_gettext("Port"),
+                widget=BS3TextFieldWidget(),
+                description=lazy_gettext("Port of the TM1 server"),
+            ),
+            "ssl": StringField(
+                lazy_gettext("SSL"),
+                widget=BS3TextFieldWidget(),
+                description=lazy_gettext("True or False"),
+            ),
+            "cam_namespace": StringField(
+                lazy_gettext("CAM Namespace"),
+                widget=BS3TextFieldWidget(),
+                description=lazy_gettext("CAM Namespace"),
+            ),
+            "user": StringField(
+                lazy_gettext("User"),
+                widget=BS3TextFieldWidget(),
+            ),
+            "password": PasswordField(
+                lazy_gettext("Password"),
+                widget=BS3PasswordFieldWidget(),
+            ),
+        }
+
+    @classmethod
+    def get_ui_field_behaviour(cls) -> Dict[str, Any]:
+        return {
+            "hidden_fields": ["extra", "host", "schema", "port", "login", "password"],
+            "relabeling": {},
+        }
+
     def logout(self):
         self.tm1.logout()
 
