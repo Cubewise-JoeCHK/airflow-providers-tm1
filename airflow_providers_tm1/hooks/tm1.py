@@ -1,20 +1,13 @@
-from os import name
 from typing import Any, Dict, Optional
 
-from flask_appbuilder.fieldwidgets import (
-    BS3PasswordFieldWidget,
-    BS3TextFieldWidget,
-)
+from flask_appbuilder.fieldwidgets import BS3TextFieldWidget
 from flask_babel import lazy_gettext
 from TM1py.Services import TM1Service
-from wtforms import PasswordField, StringField
+from wtforms import StringField
 
 from airflow.exceptions import AirflowException
 from airflow.hooks.base import BaseHook
-import logging 
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 class TM1Hook(BaseHook):
     """
@@ -53,7 +46,7 @@ class TM1Hook(BaseHook):
         self.port: str = str(conn.port)
         self.user: str = conn.login
         self.password: str = conn.get_password()
-        self.ssl: bool = extra['ssl'] == "True"
+        self.ssl: bool = extra["ssl"] == "True"
         self.session_context = "Airflow"
         self.namespace: str = conn.schema
 
@@ -61,7 +54,6 @@ class TM1Hook(BaseHook):
         """Function that creates a new TM1py Service object and returns it"""
 
         if not self.client:
-            logger.debug("Creating tm1 client for conn_id: %s", self.tm1_conn_id)
             self.log.debug("Creating tm1 client for conn_id: %s", self.tm1_conn_id)
 
             if not self.tm1_conn_id:
@@ -112,7 +104,9 @@ class TM1Hook(BaseHook):
     @classmethod
     def get_ui_field_behaviour(cls) -> Dict[str, Any]:
         return {
-            "hidden_fields": ["extra", ],
+            "hidden_fields": [
+                "extra",
+            ],
             "relabeling": {
                 "host": "Address",
                 "schema": "Namespace",
