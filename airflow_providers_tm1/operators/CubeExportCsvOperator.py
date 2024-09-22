@@ -41,7 +41,16 @@ class CubeExportCsvOperator(BaseOperator):
     """
 
     def __init__(
-        self, connection_id, cube_name: str,  csv_file_path: str, transform_callable: Callable | None, mdx: str = '', cubeview: str = "", execute_mdx_param: dict = {}, *args, **kwargs
+        self,
+        connection_id,
+        cube_name: str,
+        csv_file_path: str,
+        transform_callable: Callable | None,
+        mdx: str = "",
+        cubeview: str = "",
+        execute_mdx_param: dict = {},
+        *args,
+        **kwargs,
     ):
 
         super().__init__(
@@ -55,7 +64,7 @@ class CubeExportCsvOperator(BaseOperator):
         self.csv_file_path = csv_file_path
         self.cube_name = cube_name
         self.transform_callable = transform_callable
-        self.mdx = mdx 
+        self.mdx = mdx
 
         self.cubeview = cubeview
         if (not self.mdx and not self.cubeview) or (self.mdx and self.cubeview):
@@ -80,14 +89,17 @@ class CubeExportCsvOperator(BaseOperator):
                 if not tm1.views.exists(cube_name=self.cube_name, view_name=self.cubeview):
                     raise AirflowException(f"Cubeview {self.cubeview} not found in cube {self.cube_name}")
                 cubeview_mdx = tm1.views.get(cube_name=self.cube_name, view_name=self.cubeview).MDX
-            
+
             mdx = self.mdx or cubeview_mdx
 
             cell_count = tm1.cells.execute_mdx_cellcount(self.mdx)
             logger.debug(f"cell count: {cell_count} with mdx: \n{mdx}")
 
             logger.debug(f"executing mdx with parameters: {self.execute_mdx_param}")
-            df = tm1.cells.execute_mdx_dataframe(mdx, **self.execute_mdx_param,)
+            df = tm1.cells.execute_mdx_dataframe(
+                mdx,
+                **self.execute_mdx_param,
+            )
             logger.debug(f"raw dataframe shape : {df.shape}")
             logger.debug(f"memory usage: \n{df.memory_usage(index=False)}")
             logger.debug(f"dataframe head: \n{df.head()}")
@@ -95,5 +107,4 @@ class CubeExportCsvOperator(BaseOperator):
             if callable(self.transform_callable):
                 df = self.transform_callable(df, **self.kwargs)
 
-            df.to_csv(self.csv_file_path, index=False, encoding='utf-8')
-    
+            df.to_csv(self.csv_file_path, index=False, encoding="utf-8")

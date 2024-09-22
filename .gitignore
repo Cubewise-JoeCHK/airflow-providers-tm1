@@ -139,3 +139,5 @@ logs/
 
 my.secrets
 airflow/*
+data/*
+*.sh
