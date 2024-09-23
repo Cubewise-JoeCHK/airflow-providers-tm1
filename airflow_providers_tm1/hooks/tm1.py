@@ -68,6 +68,7 @@ class TM1Hook(BaseHook):
                     password=self.password,
                     ssl=self.ssl,
                     namespace=self.namespace,
+                    session_context=self.session_context,
                 )
                 self.server_name = self.client.server.get_server_name()
                 self.server_version = self.client.server.get_product_version()
