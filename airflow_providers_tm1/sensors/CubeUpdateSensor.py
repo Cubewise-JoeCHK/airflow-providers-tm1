@@ -37,7 +37,7 @@ class CubeUpdateSensor(BaseSensorOperator):
     def poke(self, context):
         with self.hook.get_conn() as tm1:
             variable_name = f"{self.conn_id}.{self.cube_name}.last_update"
-            last_flag = Variable.get(variable_name, default_var=None) if not self.refresh else None
+            last_flag = Variable.get(variable_name, default_var=None)
             last_update = tm1.cubes.get_last_data_update(self.cube_name)
 
             # Log the updates for debugging purposes
